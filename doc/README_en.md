@@ -5,7 +5,7 @@
 
  [🇯🇵](../README.md) |  🇺🇸
 
-![image](IMG_0128.png)
+<img src='IMG_0128.png' width='400'>
 
 ## TL;DR
 
