@@ -5,7 +5,7 @@
 
  🇯🇵 |  [🇺🇸](doc/README_en.md)
 
-<img src='doc/IMG_0128.png', width='120'>
+<img src='doc/IMG_0128.png' width='400'>
 
 ## TL;DR
 
