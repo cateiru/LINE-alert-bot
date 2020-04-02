@@ -117,7 +117,7 @@ def format(body: BODY_TYPE) -> List[str]:
             main_message = details_data['Report']['Head']['Headline']['Text']
             seismic_intensity = details_data['Report']['Head']['Headline']['Information']['Item']['Kind']['Name']
             area = details_data['Report']['Head']['Headline']['Information']['Item']['Areas']['Area']['Name']
-            message = f'【地震速報】\n{main_message}\n{seismic_intensity}: {area}'
+            message = f'【地震速報】\n{main_message}\n\n{seismic_intensity}: {area}'
         else:
             target_time = details_data['Report']['Head']['TargetDateTime']
             main_message = details_data['Report']['Head']['Headline']['Text']
@@ -125,7 +125,7 @@ def format(body: BODY_TYPE) -> List[str]:
             magnitude = details_data['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
             comment = details_data['Report']['Body']['Comments']['ForecastComment']['Text']
 
-            message = f'【{title}】\n発生時間: {target_time}\n{main_message}\nエリア: {area}\nマグニチュード: M{magnitude}\n{comment}'
+            message = f'【{title}】\n発生時間: {target_time}\n{main_message}\n---------\nエリア: {area}\n\nマグニチュード: M{magnitude}\n\n{comment}'
         text.append(message)
     return text
 
