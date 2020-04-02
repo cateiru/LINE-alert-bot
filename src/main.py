@@ -3,7 +3,7 @@ import click
 
 @click.command()
 @click.option('--line-webhook', 'webhook', prompt=True, help='LINE webhook.')
-def main(webhook):
+def main(webhook: str) -> None:
     pass
 
 

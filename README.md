@@ -1,3 +1,3 @@
 # LINE-alert-bot
 
-## LINE APIを使用した遊びです。
+気象庁から地震データを取得してLINEにpostします。

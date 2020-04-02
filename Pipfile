@@ -5,7 +5,6 @@ verify_ssl = true
 
 [dev-packages]
 flake8 = "*"
-v = {editable = true,version = "*"}
 pylint = "*"
 mypy = "*"
 autopep8 = "*"
@@ -13,6 +12,8 @@ autopep8 = "*"
 [packages]
 click = "*"
 line-bot-sdk = "*"
+lxml = "*"
+xmltodict = "*"
 
 [requires]
 python_version = "3.6"
