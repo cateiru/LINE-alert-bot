@@ -19,6 +19,12 @@ BODY_TYPE = TypeVar(List[Dict[str, Union[str, Dict[str, str]]]])
 @click.command()
 @click.option('--line-webhook', 'token', prompt=True, hide_input=True, help='LINE webhook.')
 def main(token: str) -> None:
+    '''
+    メイン
+
+    Args:
+        token (str): LINEのウェブホックID
+    '''
     directory = os.path.dirname(__file__)
     json_save_directory = os.path.join(directory, 'json_save')
     if not os.path.isdir(json_save_directory):
@@ -30,6 +36,13 @@ def main(token: str) -> None:
 
 
 def connect(json_file_path: str, token: str) -> None:
+    '''
+    情報を取得、フォーマット、LINEにpostを実行します。
+
+    Args:
+        json_file_path (str): JSONファイルのパス
+        token (str): LINEのウェブホックID
+    '''
     xml_body = access('http://www.data.jma.go.jp/developer/xml/feed/eqvol.xml')
     json_body = convert_xml_to_dict(xml_body)
     body = json_body['feed']['entry']
@@ -42,7 +55,7 @@ def connect(json_file_path: str, token: str) -> None:
     json_write(json_file_path, body)
     if new_alert != []:
         new_alert = select_earthquake(new_alert)
-        new_alert = format(new_alert)
+        new_alert = format_text(new_alert)
         post_line(token, new_alert)
         print(f'POST:\n{new_alert}')
 
@@ -52,7 +65,7 @@ def post_line(token: str, text: List[str]):
     LINE BOTにpostします。
 
     Args:
-        token (str): LINEのアクセストークン
+        token (str): LINEのウェブホックID
         text (str): 送信するメッセージ
     '''
     line_bot_api = linebot.LineBotApi(token)
@@ -95,7 +108,7 @@ def select_earthquake(body: BODY_TYPE) -> BODY_TYPE:
     return earthquake_data
 
 
-def format(body: BODY_TYPE) -> List[str]:
+def format_text(body: BODY_TYPE) -> List[str]:
     '''
     SNSなどに投稿できるようにフォーマットします。
 
@@ -125,7 +138,8 @@ def format(body: BODY_TYPE) -> List[str]:
             magnitude = details_data['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
             comment = details_data['Report']['Body']['Comments']['ForecastComment']['Text']
 
-            message = f'【{title}】\n発生時間: {target_time}\n{main_message}\n---------\nエリア: {area}\n\nマグニチュード: M{magnitude}\n\n{comment}'
+            message = f'【{title}】\n発生時間: {target_time}\n{main_message}\
+\n---------\nエリア: {area}\n\nマグニチュード: M{magnitude}\n\n{comment}'
         text.append(message)
     return text
 
