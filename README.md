@@ -7,6 +7,8 @@
 
 <img src='doc/IMG_0128.png' width='400'>
 
+<a href="https://lin.ee/jTUmGFn"><img src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png" alt="友だち追加" height="36" border="0"></a>
+
 ## TL;DR
 
 [気象庁から地震のデータ](http://www.data.jma.go.jp/developer/xml/feed/eqvol.xml)を取得してLINEにpostします。
