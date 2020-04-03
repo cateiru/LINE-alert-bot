@@ -17,13 +17,13 @@ BODY_TYPE = TypeVar(List[Dict[str, Union[str, Dict[str, str]]]])
 
 
 @click.command()
-@click.option('--line-webhook', 'token', prompt=True, hide_input=True, help='LINE webhook.')
+@click.option('--line-token', 'token', prompt=True, hide_input=True, help='LINE webhook.')
 def main(token: str) -> None:
     '''
     メイン
 
     Args:
-        token (str): LINEのウェブホックID
+        token (str): LINEのアクセストークン
     '''
     directory = os.path.dirname(__file__)
     json_save_directory = os.path.join(directory, 'json_save')
@@ -41,7 +41,7 @@ def connect(json_file_path: str, token: str) -> None:
 
     Args:
         json_file_path (str): JSONファイルのパス
-        token (str): LINEのウェブホックID
+        token (str): LINEのアクセストークン
     '''
     xml_body = access('http://www.data.jma.go.jp/developer/xml/feed/eqvol.xml')
     json_body = convert_xml_to_dict(xml_body)
@@ -65,7 +65,7 @@ def post_line(token: str, text: List[str]):
     LINE BOTにpostします。
 
     Args:
-        token (str): LINEのウェブホックID
+        token (str): LINEのアクセストークン
         text (str): 送信するメッセージ
     '''
     line_bot_api = linebot.LineBotApi(token)
