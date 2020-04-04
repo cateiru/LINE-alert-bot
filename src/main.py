@@ -4,7 +4,7 @@ main
 import os
 import re
 import time
-from typing import Dict, List, Union, Any
+from typing import List, Any
 
 import click
 import linebot
