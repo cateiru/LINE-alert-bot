@@ -4,7 +4,7 @@ main
 import os
 import re
 import time
-from typing import Dict, List, TypeVar, Union
+from typing import Dict, List, Union, Any
 
 import click
 import linebot
@@ -12,8 +12,6 @@ from linebot.models import TextSendMessage
 
 from json_operation import json_read, json_write
 from scrape import access, convert_xml_to_dict
-
-BODY_TYPE = TypeVar(List[Dict[str, Union[str, Dict[str, str]]]])
 
 
 @click.command()
@@ -73,13 +71,13 @@ def post_line(token: str, text: List[str]):
         line_bot_api.broadcast(TextSendMessage(text=message))
 
 
-def get_new_alert(body: BODY_TYPE, old_body: BODY_TYPE):
+def get_new_alert(body: Any, old_body: Any):
     '''
     古い情報を取得して新しい情報が取得された際にそれを返す。
 
     Args:
-        body ([type]): 新しいデータ
-        old_body ([type]): 古いデータ
+        body (Any): 新しいデータ
+        old_body (Any): 古いデータ
     '''
     new_alert = []
     for element in body:
@@ -90,15 +88,15 @@ def get_new_alert(body: BODY_TYPE, old_body: BODY_TYPE):
     return new_alert
 
 
-def select_earthquake(body: BODY_TYPE) -> BODY_TYPE:
+def select_earthquake(body: Any) -> Any:
     '''
     地震に関する情報のみ取得
 
     Args:
-        body (BODY_TYPE): 情報
+        body (Any): 情報
 
     Returns:
-        BODY_TYPE: 地震に関する情報
+        Any: 地震に関する情報
     '''
     earthquake_data = []
     for element in body:
@@ -108,12 +106,12 @@ def select_earthquake(body: BODY_TYPE) -> BODY_TYPE:
     return earthquake_data
 
 
-def format_text(body: BODY_TYPE) -> List[str]:
+def format_text(body: Any) -> List[str]:
     '''
     SNSなどに投稿できるようにフォーマットします。
 
     Args:
-        body (BODY_TYPE): 取得したデータ
+        body (Any): 取得したデータ
 
     Returns:
         List[str]: フォーマットしたデータ
