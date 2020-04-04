@@ -1,3 +1,6 @@
+'''
+情報の取得
+'''
 from typing import Dict
 
 import urllib3

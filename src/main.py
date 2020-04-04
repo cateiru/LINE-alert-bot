@@ -28,7 +28,7 @@ def main(token: str) -> None:
     if not os.path.isdir(json_save_directory):
         os.makedirs(json_save_directory)
     json_file_path = os.path.join(json_save_directory, 'save_alert.json')
-    while(True):
+    while(True):  # pylint: disable=C0325
         connect(json_file_path, token)
         time.sleep(1)
 
@@ -143,4 +143,4 @@ def format_text(body: Any) -> List[str]:
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=E1120
