@@ -30,7 +30,7 @@ def main(token: str) -> None:
     json_file_path = os.path.join(json_save_directory, 'save_alert.json')
     while(True):  # pylint: disable=C0325
         connect(json_file_path, token)
-        time.sleep(1)
+        time.sleep(30)
 
 
 def connect(json_file_path: str, token: str) -> None:
