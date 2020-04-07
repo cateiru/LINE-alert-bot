@@ -1,6 +1,7 @@
 '''
 main
 '''
+import json
 import os
 import re
 import time
@@ -27,13 +28,12 @@ def main(token: str) -> None:
     json_save_directory = os.path.join(directory, 'json_save')
     if not os.path.isdir(json_save_directory):
         os.makedirs(json_save_directory)
-    json_file_path = os.path.join(json_save_directory, 'save_alert.json')
     while(True):  # pylint: disable=C0325
-        connect(json_file_path, token)
+        connect(json_save_directory, token)
         time.sleep(30)
 
 
-def connect(json_file_path: str, token: str) -> None:
+def connect(json_save_directory: str, token: str) -> None:
     '''
     情報を取得、フォーマット、LINEにpostを実行します。
 
@@ -41,6 +41,9 @@ def connect(json_file_path: str, token: str) -> None:
         json_file_path (str): JSONファイルのパス
         token (str): LINEのアクセストークン
     '''
+    json_file_path = os.path.join(json_save_directory, 'save_alert.json')
+    backup_path = os.path.join(json_save_directory, 'backup.json')
+
     xml_body = access('http://www.data.jma.go.jp/developer/xml/feed/eqvol.xml')
     json_body = convert_xml_to_dict(xml_body)
     body = json_body['feed']['entry']
@@ -49,13 +52,21 @@ def connect(json_file_path: str, token: str) -> None:
         old_body = json_read(json_file_path)
     else:
         old_body = []
+
+    if os.path.isfile(backup_path):
+        backup_body = json_read(backup_path)
+    else:
+        backup_body = []
+
     new_alert = get_new_alert(body, old_body)
     json_write(json_file_path, body)
-    if new_alert != []:
+    if new_alert != [] and new_alert not in backup_body:
         new_alert = select_earthquake(new_alert)
         new_alert = format_text(new_alert)
         post_line(token, new_alert)
         print(f'POST:\n{new_alert}')
+        backup_body += new_alert
+        json_write(backup_path, backup_body)
 
 
 def post_line(token: str, text: List[str]):
@@ -124,10 +135,13 @@ def format_text(body: Any) -> List[str]:
 
         title = details_data['Report']['Head']['Title']
 
-        if title == '震度速報':
-            message = earthquake_early_warning(details_data)
-        else:
-            message = earthquake_information(details_data, title)
+        try:
+            if title == '震度速報':
+                message = earthquake_early_warning(details_data)
+            else:
+                message = earthquake_information(details_data, title)
+        except Exception:
+            message = f'【format error】\n{json.dumps(details_data)}'
 
         text.append(message)
     return text
