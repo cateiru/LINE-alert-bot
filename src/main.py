@@ -10,8 +10,8 @@ import click
 import linebot
 from linebot.models import TextSendMessage
 
-from .json_operation import json_read, json_write
-from .scrape import access, convert_xml_to_dict
+from json_operation import json_read, json_write
+from scrape import access, convert_xml_to_dict
 
 
 @click.command()
