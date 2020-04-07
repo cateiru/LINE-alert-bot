@@ -4,14 +4,14 @@ main
 import os
 import re
 import time
-from typing import List, Any
+from typing import Any, List
 
 import click
 import linebot
 from linebot.models import TextSendMessage
 
-from json_operation import json_read, json_write
-from scrape import access, convert_xml_to_dict
+from .json_operation import json_read, json_write
+from .scrape import access, convert_xml_to_dict
 
 
 @click.command()
@@ -125,21 +125,56 @@ def format_text(body: Any) -> List[str]:
         title = details_data['Report']['Head']['Title']
 
         if title == '震度速報':
-            main_message = details_data['Report']['Head']['Headline']['Text']
-            seismic_intensity = details_data['Report']['Head']['Headline']['Information']['Item']['Kind']['Name']
-            area = details_data['Report']['Head']['Headline']['Information']['Item']['Areas']['Area']['Name']
-            message = f'【地震速報】\n{main_message}\n\n{seismic_intensity}: {area}'
+            message = earthquake_early_warning(details_data)
         else:
-            target_time = details_data['Report']['Head']['TargetDateTime']
-            main_message = details_data['Report']['Head']['Headline']['Text']
-            area = details_data['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
-            magnitude = details_data['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
-            comment = details_data['Report']['Body']['Comments']['ForecastComment']['Text']
+            message = earthquake_information(details_data, title)
 
-            message = f'【{title}】\n発生時間: {target_time}\n{main_message}\
-\n---------\nエリア: {area}\n\nマグニチュード: M{magnitude}\n\n{comment}'
         text.append(message)
     return text
+
+
+def earthquake_early_warning(details_data: Any) -> str:
+    '''
+    地震速報をフォーマットする。
+
+    Args:
+        details_data (Any): Dictのデータ
+
+    Returns:
+        str: 整形されたデータ
+    '''
+    main_message = details_data['Report']['Head']['Headline']['Text']
+    seismic_intensity = details_data['Report']['Head']['Headline']['Information']['Item']['Kind']['Name']
+    areas = details_data['Report']['Head']['Headline']['Information']['Item']['Areas']['Area']
+    if isinstance(areas, list):
+        area = areas[0]['Name']
+        areas = areas[1:]
+        for area_type in areas:
+            area = f'{area}, {area_type["Name"]}'
+    else:
+        area = areas['Name']
+    return f'【地震速報】\n{main_message}\n\n{seismic_intensity}: {area}'
+
+
+def earthquake_information(details_data: Any, title: str) -> str:
+    '''
+    地震情報をフォーマットする
+
+    Args:
+        details_data (Any): Dictのデータ
+        title (str): タイトル
+
+    Returns:
+        str: 整形されたデータ
+    '''
+    target_time = details_data['Report']['Head']['TargetDateTime']
+    main_message = details_data['Report']['Head']['Headline']['Text']
+    area = details_data['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
+    magnitude = details_data['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
+    comment = details_data['Report']['Body']['Comments']['ForecastComment']['Text']
+
+    return f'【{title}】\n発生時間: {target_time}\n{main_message}\
+\n---------\nエリア: {area}\n\nマグニチュード: M{magnitude}\n\n{comment}'
 
 
 if __name__ == "__main__":

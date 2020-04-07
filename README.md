@@ -28,6 +28,8 @@ pipenv install
 
 ## 🚀 実行
 
+<a href="https://lin.ee/jTUmGFn"><img src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png" alt="友だち追加" height="20" border="0"></a>
+
 ```bash
 pipenv shell
 python src/main.py
