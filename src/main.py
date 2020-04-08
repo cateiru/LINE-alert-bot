@@ -3,8 +3,8 @@ main
 '''
 import json
 import os
-import re
 import time
+from xml.etree import ElementTree
 from typing import Any, List
 
 import click
@@ -45,8 +45,8 @@ def connect(json_save_directory: str, token: str) -> None:
     backup_path = os.path.join(json_save_directory, 'backup.json')
 
     xml_body = access('http://www.data.jma.go.jp/developer/xml/feed/eqvol.xml')
-    json_body = convert_xml_to_dict(xml_body)
-    body = json_body['feed']['entry']
+    body = ElementTree.fromstring(xml_body)
+    body = body.feed.entry
 
     if os.path.isfile(json_file_path):
         old_body = json_read(json_file_path)
@@ -111,7 +111,7 @@ def select_earthquake(body: Any) -> Any:
     '''
     earthquake_data = []
     for element in body:
-        is_earthquake = re.match(r'震', element['title'])
+        is_earthquake = ['震源・震度に関する情報', '震度速報', '震源に関する情報']
         if is_earthquake:
             earthquake_data.append(element)
     return earthquake_data
@@ -181,13 +181,12 @@ def earthquake_information(details_data: Any, title: str) -> str:
     Returns:
         str: 整形されたデータ
     '''
-    target_time = details_data['Report']['Head']['TargetDateTime']
     main_message = details_data['Report']['Head']['Headline']['Text']
     area = details_data['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
     magnitude = details_data['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
     comment = details_data['Report']['Body']['Comments']['ForecastComment']['Text']
 
-    return f'【{title}】\n発生時間: {target_time}\n{main_message}\
+    return f'【{title}】\n{main_message}\
 \n---------\nエリア: {area}\n\nマグニチュード: M{magnitude}\n\n{comment}'
 
 

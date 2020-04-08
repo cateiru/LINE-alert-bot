@@ -21,13 +21,13 @@ def json_read(json_file_path: str) -> Any:
     return json_body
 
 
-def json_write(save_directory: str, json_body: Any) -> None:
+def json_write(json_file_path: str, json_body: Any) -> None:
     '''
     JSONを保存する。
 
     Args:
-        save_directory (str): JSONファイルパス
+        json_file_path (str): JSONファイルパス
         json_body (Any): JSONの内容
     '''
-    with open(save_directory, mode='w') as contents:
+    with open(json_file_path, mode='w') as contents:
         json.dump(json_body, contents, indent=4, ensure_ascii=False)
