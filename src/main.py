@@ -1,193 +1,342 @@
 '''
-main
+Copyright © 2020 YutoWatanabe
 '''
-import json
 import os
 import time
-from xml.etree import ElementTree
-from typing import Any, List
+from typing import Any, Dict, List
 
 import click
 import linebot
+import requests
+import xmltodict
 from linebot.models import TextSendMessage
 
 from json_operation import json_read, json_write
-from scrape import access, convert_xml_to_dict
 
 
 @click.command()
-@click.option('--line-token', 'token', prompt=True, hide_input=True, help='LINE webhook.')
-def main(token: str) -> None:
+@click.option('--line-token', 'token', prompt=True, hide_input=True, help='Line token')
+def main(token: str):
     '''
-    メイン
+    メイン。30秒ごとに実行します。
 
     Args:
-        token (str): LINEのアクセストークン
+        token (str): LINEのトークン
     '''
-    directory = os.path.dirname(__file__)
-    json_save_directory = os.path.join(directory, 'json_save')
-    if not os.path.isdir(json_save_directory):
-        os.makedirs(json_save_directory)
+    run_directory = os.path.dirname(__file__)
+    url = 'http://www.data.jma.go.jp/developer/xml/feed/eqvol.xml'
+    earthquake = Earthquake(run_directory, url, token)
     while(True):  # pylint: disable=C0325
-        connect(json_save_directory, token)
+        if earthquake.check_update():
+            earthquake.get_earthquake_information()
+            earthquake.find_latest()
+            # earthquake.post_line()
+            earthquake.write_error()
+            print(earthquake.post_message)
         time.sleep(30)
 
 
-def connect(json_save_directory: str, token: str) -> None:
+class Earthquake():  # pylint: disable=R0902
     '''
-    情報を取得、フォーマット、LINEにpostを実行します。
-
-    Args:
-        json_file_path (str): JSONファイルのパス
-        token (str): LINEのアクセストークン
+    地震情報を取得、フォーマット、LINEにpostします。
     '''
-    json_file_path = os.path.join(json_save_directory, 'save_alert.json')
-    backup_path = os.path.join(json_save_directory, 'backup.json')
 
-    xml_body = access('http://www.data.jma.go.jp/developer/xml/feed/eqvol.xml')
-    body = ElementTree.fromstring(xml_body)
-    body = body.feed.entry
+    def __init__(self, save_directory: str, url: str, token: str):
+        self.url = url
+        self.token = token
+        self.save_directory = save_directory
+        self.directory = os.path.join(self.save_directory, 'saves')
+        if not os.path.isdir(self.directory):
+            os.makedirs(self.directory)
 
-    if os.path.isfile(json_file_path):
-        old_body = json_read(json_file_path)
-    else:
-        old_body = []
+        self.responce: Any = None
+        self.formated_text: List[str] = []
+        self.xml_root: Any = None
+        self.post_message: List[str] = []
+        self.error: List[Any] = []
 
-    if os.path.isfile(backup_path):
-        backup_body = json_read(backup_path)
-    else:
-        backup_body = []
+    def check_update(self) -> bool:
+        '''
+        サイトが更新されているか確認します。
 
-    new_alert = get_new_alert(body, old_body)
-    json_write(json_file_path, body)
-    if new_alert != [] and new_alert not in backup_body:
-        new_alert = select_earthquake(new_alert)
-        new_alert = format_text(new_alert)
-        post_line(token, new_alert)
-        print(f'POST:\n{new_alert}')
-        backup_body += new_alert
-        json_write(backup_path, backup_body)
-
-
-def post_line(token: str, text: List[str]):
-    '''
-    LINE BOTにpostします。
-
-    Args:
-        token (str): LINEのアクセストークン
-        text (str): 送信するメッセージ
-    '''
-    line_bot_api = linebot.LineBotApi(token)
-    for message in reversed(text):
-        line_bot_api.broadcast(TextSendMessage(text=message))
-
-
-def get_new_alert(body: Any, old_body: Any):
-    '''
-    古い情報を取得して新しい情報が取得された際にそれを返す。
-
-    Args:
-        body (Any): 新しいデータ
-        old_body (Any): 古いデータ
-    '''
-    new_alert = []
-    for element in body:
-        if element not in old_body:
-            new_alert.append(element)
-        else:
-            break
-    return new_alert
-
-
-def select_earthquake(body: Any) -> Any:
-    '''
-    地震に関する情報のみ取得
-
-    Args:
-        body (Any): 情報
-
-    Returns:
-        Any: 地震に関する情報
-    '''
-    earthquake_data = []
-    for element in body:
-        is_earthquake = ['震源・震度に関する情報', '震度速報', '震源に関する情報']
-        if is_earthquake:
-            earthquake_data.append(element)
-    return earthquake_data
-
-
-def format_text(body: Any) -> List[str]:
-    '''
-    SNSなどに投稿できるようにフォーマットします。
-
-    Args:
-        body (Any): 取得したデータ
-
-    Returns:
-        List[str]: フォーマットしたデータ
-    '''
-    text = []
-    for element in body:
-        link = element['link']['@href']
-        xml_details_data = access(link)
-        details_data = convert_xml_to_dict(xml_details_data)
-
-        title = details_data['Report']['Head']['Title']
-
+        Returns:
+            bool: 更新されていた場合True。されていない場合はFalse。
+        '''
+        is_update = False
         try:
+            self.responce = requests.get(self.url)
+        except Exception as error:  # pylint: disable=W0703
+            self.error.append(error)
+            return False
+        last_acquisition_file_path = os.path.join(self.directory, 'last_acquisition.json')
+        last_acquisition = self.__load_buffer(last_acquisition_file_path, {'latest': None})
+
+        last_modified: str = self.responce.headers['Last-Modified']
+
+        if last_modified != last_acquisition['latest']:
+            is_update = True
+            self.__save_buffer(last_acquisition_file_path, {'latest': last_modified})
+
+        return is_update
+
+    def get_earthquake_information(self):
+        '''
+        地震速報を取得します。
+        - 震度速報
+        - 震源に関する情報
+        - 震源・震度に関する情報
+        - 緊急地震速報(予報)
+        - 緊急地震速報(警報)
+
+        すべてをフォーマットします。
+        '''
+        if self.responce is None:
+            self.responce = requests.get(self.url)
+        self.responce.encoding = 'UTF-8'
+        text = self.responce.text
+
+        self.xml_root = xmltodict.parse(text)
+        for child in self.xml_root['feed']['entry']:
+            title = child['title']
             if title == '震度速報':
-                message = earthquake_early_warning(details_data)
+                url = child['link']['@href']
+                self.__earthquake_intensity_report(url)
+            elif title == '震源に関する情報':
+                url = child['link']['@href']
+                self.__epicenter_information(url)
+            elif title == '震源・震度に関する情報':
+                url = child['link']['@href']
+                self.__information_on_epicenter_and_seismic_intensity(url)
+            elif title == '緊急地震速報（予報）':
+                url = child['link']['@href']
+                self.__earthquake_early_warning_forecast(url)
+            elif title == '緊急地震速報（警報）':
+                url = child['link']['@href']
+                self.__earthquake_early_warning_alarm(url)
+            elif title == '津波情報a':
+                pass
+            elif title == '津波警報・注意報・予報a':
+                pass
+
+    def find_latest(self):
+        '''
+        最新の情報を振り分ける。
+        '''
+        earthquake_info_path = os.path.join(self.directory, 'latest_earthquake_info.json')
+        earthquake_information = self.__load_buffer(earthquake_info_path, [])
+
+        self.post_message = []
+        for individual in self.formated_text:
+            if individual not in earthquake_information:
+                self.post_message.append(individual)
+                earthquake_information.append(individual)
+                self.__save_buffer(earthquake_info_path, earthquake_information)
+
+    def post_line(self):
+        '''
+        LINEにpostする。
+        '''
+        line_bot_api = linebot.LineBotApi(self.token)
+        for message in reversed(self.post_message):
+            line_bot_api.broadcast(TextSendMessage(text=message))
+
+    def __earthquake_intensity_report(self, url):
+        '''
+        フォーマット。
+        -----
+        【震度速報】
+        ここにメイン文
+
+        震度4: エリア1
+        震度3: エリア2, エリア3, エリア4
+
+        [注釈: str]
+        -----
+        > 震度速報
+        '''
+        earthquake_details = self.__request_text(url)
+        details_root = xmltodict.parse(earthquake_details)
+
+        main_text = details_root['Report']['Head']['Headline']['Text']
+        forecast_comment = details_root['Report']['Body']['Comments']['Text']
+
+        area_info = self.__format_area(details_root)
+
+        text = f'【震度速報】\n{main_text}\n\n'
+        for element in area_info:
+            text += f'{element}: {area_info[element]}\n'
+        text += f'\n{forecast_comment}'
+        self.formated_text.append(text)
+
+    def __epicenter_information(self, url):
+        '''
+        フォーマット
+        -----
+        【震源に関する情報】
+        [ここにメイン文]
+
+        震源地: [area: str]
+        マグニチュード: [マグニチュード: str]
+
+        [注釈: str]
+        -----
+        > 震源に関する情報
+        '''
+        earthquake_details = self.__request_text(url)
+        details_root = xmltodict.parse(earthquake_details)
+
+        main_text = details_root['Report']['Head']['Headline']['Text']
+        magnitude = details_root['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
+        area = details_root['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
+        forecast_comment = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
+
+        text = f'【震源・震度に関する情報】\n{main_text}\n\n震源地: {area}\n\nマグニチュード: M{magnitude}\n\n'
+        text += forecast_comment
+        self.formated_text.append(text)
+
+    def __information_on_epicenter_and_seismic_intensity(self, url):
+        '''
+        フォーマット
+        -----
+        【震源・震度に関する情報】
+        ここにメイン文
+
+        震源地: [エリア: str]
+
+        マグニチュード: [マグニチュード: str]
+
+        最大震度: [最大震度: str]
+
+        [注釈: str]
+        -----
+        > 震源・震度に関する情報
+        '''
+        earthquake_details = self.__request_text(url)
+        details_root = xmltodict.parse(earthquake_details)
+
+        main_text = details_root['Report']['Head']['Headline']['Text']
+        magnitude = details_root['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
+        area = details_root['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
+        max_seismic_intensity = details_root['Report']['Body']['Intensity']['Observation']['MaxInt']
+        forecast_comment = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
+
+        text = f'【震源・震度に関する情報】\n{main_text}\n\n震源地: {area}\n\nマグニチュード: M{magnitude}\n\n'
+        text += f'最大震度: {max_seismic_intensity}\n\n'
+        text += forecast_comment
+        self.formated_text.append(text)
+
+    def __earthquake_early_warning_forecast(self, url):
+        '''
+        フォーマット
+        > 緊急地震速報（予報）
+        '''
+        # earthquake_details = __request_text(url)
+        # details_root = xmltodict.parse(earthquake_details)
+        text = '【緊急地震速報 (予報)】\n\n'
+        self.formated_text.append(text)
+
+    def __earthquake_early_warning_alarm(self, url):
+        '''
+        フォーマット
+        > 緊急地震速報（警報）
+        '''
+        # earthquake_details = __request_text(url)
+        # details_root = xmltodict.parse(earthquake_details)
+        text = '【緊急地震速報 (警報)】'
+        self.formated_text.append(text)
+
+    @staticmethod
+    def __format_area(details: Any) -> Dict[str, str]:
+        '''
+        震度とエリアの情報をフォーマットします。
+
+        Args:
+            details (Any): 元データ
+
+        Returns:
+            Dict[str, str]: フォーマットされたデータ。例: {'震度4': 'エリア1', '震度3': 'エリア2, エリア3, エリア4'}
+        '''
+        area_info = {}
+        information = details['Report']['Head']['Headline']['Information'][0]['Item']
+        if isinstance(information, list):
+            for individual in information:
+                seismic_intensity = individual['Kind']['Name']
+                areas = []
+                if isinstance(individual['Areas'], list):
+                    for area in individual['Areas']:
+                        areas.append(area['Name'])
+                else:
+                    areas.append(area['Name'])
+                area_info[seismic_intensity] = ', '.join(areas)
+        else:
+            seismic_intensity = information['Kind']['Name']
+            areas = []
+            if isinstance(individual['Areas'], list):
+                for area in individual['Areas']:
+                    areas.append(area['Name'])
             else:
-                message = earthquake_information(details_data, title)
-        except Exception:
-            message = f'【format error】\n{json.dumps(details_data)}'
+                areas.append(area['Name'])
+            area_info[seismic_intensity] = ', '.join(areas)
 
-        text.append(message)
-    return text
+        return area_info
 
+    @staticmethod
+    def __request_text(url: str) -> Any:
+        '''
+        リンクの内容を返します。
 
-def earthquake_early_warning(details_data: Any) -> str:
-    '''
-    地震速報をフォーマットする。
+        Args:
+            url (str): URL
 
-    Args:
-        details_data (Any): Dictのデータ
+        Returns:
+            Any: 内容
+        '''
+        responce = requests.get(url)
+        responce.encoding = 'UTF-8'
+        return responce.text
 
-    Returns:
-        str: 整形されたデータ
-    '''
-    main_message = details_data['Report']['Head']['Headline']['Text']
-    seismic_intensity = details_data['Report']['Head']['Headline']['Information']['Item']['Kind']['Name']
-    areas = details_data['Report']['Head']['Headline']['Information']['Item']['Areas']['Area']
-    if isinstance(areas, list):
-        area = areas[0]['Name']
-        areas = areas[1:]
-        for area_type in areas:
-            area = f'{area}, {area_type["Name"]}'
-    else:
-        area = areas['Name']
-    return f'【地震速報】\n{main_message}\n\n{seismic_intensity}: {area}'
+    @staticmethod
+    def __load_buffer(path: str, empty_element: Any) -> Any:
+        '''
+        バッファファイルを読み込む。
+        もし、新規でファイルを作成する場合はフォーマットを任意に決定します。
 
+        Args:
+            path (str): 読み込むファイルのパス
+            empty_element (Any): ファイルを新規作成するときに読み込む内容。
 
-def earthquake_information(details_data: Any, title: str) -> str:
-    '''
-    地震情報をフォーマットする
+        Returns:
+            Any: バッファの内容。新規作成した場合は`empty_element`がそのまま返される。
+        '''
+        if os.path.isfile(path):
+            buffer = json_read(path)
+        else:
+            buffer = empty_element
 
-    Args:
-        details_data (Any): Dictのデータ
-        title (str): タイトル
+        return buffer
 
-    Returns:
-        str: 整形されたデータ
-    '''
-    main_message = details_data['Report']['Head']['Headline']['Text']
-    area = details_data['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
-    magnitude = details_data['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
-    comment = details_data['Report']['Body']['Comments']['ForecastComment']['Text']
+    @staticmethod
+    def __save_buffer(path: str, element: Any):
+        '''
+        バッファファイルを保存します。
 
-    return f'【{title}】\n{main_message}\
-\n---------\nエリア: {area}\n\nマグニチュード: M{magnitude}\n\n{comment}'
+        Args:
+            path (str): 保存するファイルのパス
+            element (Any): 保存する内容
+        '''
+        json_write(path, element)
+
+    def write_error(self):
+        '''
+        エラーコードを保存します。
+        '''
+        if self.error == []:
+            return
+        error_file_path = os.path.join(self.directory, 'error.json')
+        latest_error = self.__load_buffer(error_file_path, [])
+        latest_error += self.error
+        self.__save_buffer(error_file_path, latest_error)
+        self.error = []
 
 
 if __name__ == "__main__":

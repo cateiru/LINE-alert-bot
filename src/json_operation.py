@@ -1,5 +1,5 @@
 '''
-jsonファイルの操作をします。
+Copyright © 2020 YutoWatanabe
 '''
 import json
 from typing import Any
