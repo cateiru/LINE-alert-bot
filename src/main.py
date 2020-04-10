@@ -32,8 +32,6 @@ def main(token: str):
             earthquake.get_earthquake_information()
             earthquake.find_latest()
             earthquake.post_line()
-            earthquake.write_error()
-            print(earthquake.post_message)
         time.sleep(30)
 
 
@@ -66,8 +64,7 @@ class Earthquake():  # pylint: disable=R0902
         is_update = False
         try:
             self.responce = requests.get(self.url)
-        except Exception as error:  # pylint: disable=W0703
-            self.error.append(error)
+        except Exception:  # pylint: disable=W0703
             return False
         last_acquisition_file_path = os.path.join(self.directory, 'last_acquisition.json')
         last_acquisition = self.__load_buffer(last_acquisition_file_path, {'latest': None})
@@ -129,8 +126,7 @@ class Earthquake():  # pylint: disable=R0902
         for individual in self.formated_text:
             if individual not in earthquake_information:
                 self.post_message.append(individual)
-                earthquake_information.append(individual)
-                self.__save_buffer(earthquake_info_path, earthquake_information)
+        self.__save_buffer(earthquake_info_path, self.post_message)
 
     def post_line(self):
         '''
@@ -157,19 +153,10 @@ class Earthquake():  # pylint: disable=R0902
         earthquake_details = self.__request_text(url)
         details_root = xmltodict.parse(earthquake_details)
 
-        try:
-            main_text = details_root['Report']['Head']['Headline']['Text']
-            forecast_comment = details_root['Report']['Body']['Comments']['Text']
-        except KeyError as error:
-            main_text = f'KeyError: {error}'
-            forecast_comment = 'Error'
-            self.error.append(error)
+        main_text = details_root['Report']['Head']['Headline']['Text']
+        forecast_comment = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
 
-        try:
-            area_info = self.__format_area(details_root)
-        except KeyError as error:
-            area_info = {'Error': error}
-            self.error.append(error)
+        area_info = self.__format_area(details_root)
 
         text = f'【震度速報】\n{main_text}\n\n'
         for element in area_info:
@@ -194,19 +181,12 @@ class Earthquake():  # pylint: disable=R0902
         earthquake_details = self.__request_text(url)
         details_root = xmltodict.parse(earthquake_details)
 
-        try:
-            main_text = details_root['Report']['Head']['Headline']['Text']
-            magnitude = details_root['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
-            area = details_root['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
-            forecast_comment = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
-        except KeyError as error:
-            main_text = f'Error: {error}'
-            magnitude = 'N/A'
-            area = 'N/A'
-            forecast_comment = 'Error'
-            self.error.append(error)
+        main_text = details_root['Report']['Head']['Headline']['Text']
+        magnitude = details_root['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
+        area = details_root['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
+        forecast_comment = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
 
-        text = f'【震源・震度に関する情報】\n{main_text}\n\n震源地: {area}\n\nマグニチュード: M{magnitude}\n\n'
+        text = f'【震源に関する情報】\n{main_text}\n\n震源地: {area}\n\nマグニチュード: M{magnitude}\n\n'
         text += forecast_comment
         self.formated_text.append(text)
 
@@ -230,19 +210,11 @@ class Earthquake():  # pylint: disable=R0902
         earthquake_details = self.__request_text(url)
         details_root = xmltodict.parse(earthquake_details)
 
-        try:
-            main_text = details_root['Report']['Head']['Headline']['Text']
-            magnitude = details_root['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
-            area = details_root['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
-            max_seismic_intensity = details_root['Report']['Body']['Intensity']['Observation']['MaxInt']
-            forecast_comment = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
-        except KeyError as error:
-            main_text = f'Error: {error}'
-            magnitude = 'N/A'
-            area = 'N/A'
-            max_seismic_intensity = 'N/A'
-            forecast_comment = 'Error'
-            self.append(error)
+        main_text = details_root['Report']['Head']['Headline']['Text']
+        magnitude = details_root['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
+        area = details_root['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
+        max_seismic_intensity = details_root['Report']['Body']['Intensity']['Observation']['MaxInt']
+        forecast_comment = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
 
         text = f'【震源・震度に関する情報】\n{main_text}\n\n震源地: {area}\n\nマグニチュード: M{magnitude}\n\n'
         text += f'最大震度: {max_seismic_intensity}\n\n'
@@ -261,11 +233,7 @@ class Earthquake():  # pylint: disable=R0902
         earthquake_details = self.__request_text(url)
         details_root = xmltodict.parse(earthquake_details)
 
-        try:
-            main_text = details_root['Report']['Head']['Headline']['Text']
-        except KeyError as error:
-            main_text = f'KeyError: {error}'
-            self.error.append(error)
+        main_text = details_root['Report']['Head']['Headline']['Text']
 
         text = f'【緊急地震速報 (予報)】\n{main_text}'
         self.formated_text.append(text)
@@ -286,11 +254,7 @@ class Earthquake():  # pylint: disable=R0902
 
         main_text = details_root['Report']['Head']['Headline']['Text']
 
-        try:
-            area_info = self.__format_area(details_root)
-        except KeyError as error:
-            area_info = {'Error': error}
-            self.error.append(error)
+        area_info = self.__format_area(details_root)
 
         text = f'【緊急地震速報 (警報)】\n{main_text}\n\n'
         for element in area_info:
@@ -313,22 +277,14 @@ class Earthquake():  # pylint: disable=R0902
         earthquake_details = self.__request_text(url)
         details_root = xmltodict.parse(earthquake_details)
 
-        try:
-            title = details_root['Report']['Head']['Title']
-            main_text = details_root['Report']['Head']['Headline']['Text']
-        except KeyError as error:
-            title = '津波情報Error'
-            main_text = f'Error: {error}'
-            self.error.append(error)
+        title = details_root['Report']['Head']['Title']
+        main_text = details_root['Report']['Head']['Headline']['Text']
 
         text = f'【{title}】\n{main_text}'
 
-        try:
-            if 'Information' in details_root['Report']['Head']['Headline']:
-                area_info = self.formated_text(details_root)
-                text += f'\n\nエリア: {area_info[0]}\n'
-        except KeyError as error:
-            self.error.append(error)
+        if 'Information' in details_root['Report']['Head']['Headline']:
+            area_info = self.__format_area(details_root)
+            text += f'\n\nエリア: {area_info[0]}\n'
 
         self.formated_text.append(text)
 
@@ -354,20 +310,20 @@ class Earthquake():  # pylint: disable=R0902
             for individual in information:
                 seismic_intensity = individual['Kind']['Name']
                 areas = []
-                if isinstance(individual['Areas'], list):
-                    for area in individual['Areas']:
+                if isinstance(individual['Areas']['Area'], list):
+                    for area in individual['Areas']['Area']:
                         areas.append(area['Name'])
                 else:
-                    areas.append(area['Name'])
+                    areas.append(individual['Areas']['Area']['Name'])
                 area_info[seismic_intensity] = ', '.join(areas)
         else:
             seismic_intensity = information['Kind']['Name']
             areas = []
-            if isinstance(individual['Areas'], list):
-                for area in individual['Areas']:
+            if isinstance(information['Areas']['Area'], list):
+                for area in information['Areas']['Area']:
                     areas.append(area['Name'])
             else:
-                areas.append(area['Name'])
+                areas.append(information['Areas']['Area']['Name'])
             area_info[seismic_intensity] = ', '.join(areas)
 
         return area_info
@@ -417,18 +373,6 @@ class Earthquake():  # pylint: disable=R0902
             element (Any): 保存する内容
         '''
         json_write(path, element)
-
-    def write_error(self):
-        '''
-        エラーコードを保存します。
-        '''
-        if self.error == []:
-            return
-        error_file_path = os.path.join(self.directory, 'error.json')
-        latest_error = self.__load_buffer(error_file_path, [])
-        latest_error += self.error
-        self.__save_buffer(error_file_path, latest_error)
-        self.error = []
 
 
 if __name__ == "__main__":
