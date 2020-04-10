@@ -123,10 +123,13 @@ class Earthquake():  # pylint: disable=R0902
         earthquake_information = self.__load_buffer(earthquake_info_path, [])
 
         self.post_message = []
+        latest_information = earthquake_information
         for individual in self.formated_text:
             if individual not in earthquake_information:
                 self.post_message.append(individual)
-        self.__save_buffer(earthquake_info_path, self.post_message)
+                latest_information.append(individual)
+
+        self.__save_buffer(earthquake_info_path, latest_information)
 
     def post_line(self):
         '''
