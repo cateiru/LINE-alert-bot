@@ -88,6 +88,8 @@ class Earthquake():  # pylint: disable=R0902
 
         すべてをフォーマットします。
         '''
+        self.formated_text = []
+
         if self.responce is None:
             self.responce = requests.get(self.url)
         self.responce.encoding = 'UTF-8'
