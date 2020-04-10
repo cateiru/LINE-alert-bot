@@ -12,8 +12,8 @@ autopep8 = "*"
 [packages]
 click = "*"
 line-bot-sdk = "*"
-lxml = "*"
 xmltodict = "*"
+requests = "*"
 
 [requires]
 python_version = "3.6"
