@@ -116,6 +116,7 @@ class Earthquake():  # pylint: disable=R0902
                 self.__earthquake_early_warning_alarm(url)
             elif tsunami:
                 url = child['link']['@href']
+                self.__tsunami(url)
 
     def find_latest(self):
         '''
