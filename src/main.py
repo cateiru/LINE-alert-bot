@@ -166,8 +166,8 @@ class Earthquake():  # pylint: disable=R0902
 
         text = f'【震度速報】\n{main_text}\n\n'
         for element in area_info:
-            text += f'{element}: {area_info[element]}\n'
-        text += f'\n{forecast_comment}'
+            text += f'[{element}] {area_info[element]}\n\n'
+        text += f'{forecast_comment}'
         self.formated_text.append(text)
 
     def __epicenter_information(self, url):
