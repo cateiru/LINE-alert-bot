@@ -36,8 +36,9 @@ def format_report(save_directory: str, body: str) -> int:
             if diff_date.seconds > 3600:
                 delete_data.append(index)
 
-        for index in delete_data:
-            del previous_data[index]
+        delete_data.sort(reverse=True)
+        for element in delete_data:
+            del previous_data[element]
 
     is_existence = False
     for element in previous_data:
