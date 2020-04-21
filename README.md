@@ -2,6 +2,7 @@
 
 ![python](https://img.shields.io/github/pipenv/locked/python-version/yuto51942/LINE-alert-bot)
 ![last_commit](https://img.shields.io/github/last-commit/yuto51942/LINE-alert-bot)
+[![DeepSource](https://static.deepsource.io/deepsource-badge-dark-mini.svg)](https://deepsource.io/gh/yuto51942/LINE-alert-bot/?ref=repository-badge)
 <a href="https://lin.ee/jTUmGFn"><img src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png" alt="友だち追加" height="20" border="0"></a>
 
  🇯🇵 |  [🇺🇸](doc/README_en.md)
@@ -14,28 +15,21 @@
 
 ## 📢 送信する内容
 
-- 震度速報
-  - 本文、エリアごとの震度、注釈
-- 震源・震度に関する情報
-  - 本文、震源地、マグニチュード、最大震度、注釈
-- 震源に関する情報
-  - 本文、震源地、マグニチュード、注釈
-- 緊急地震速報 (予報)
-  - 本文
-- 緊急地震速報 (警報)
-  - 本文、エリア
-- 津波予報
-  - 本文
-- 津波注意報
-  - 本文、エリア
-- 津波警報
-  - 本文、エリア
-- 大津波警報
-  - 本文、エリア
+|          名称          | 内容                                         |
+| :--------------------: | :------------------------------------------- |
+|        震度速報        | 本文、エリアごとの震度、注釈                 |
+| 震源・震度に関する情報 | 本文、震源地、マグニチュード、最大震度、注釈 |
+|    震源に関する情報    | 本文、震源地、マグニチュード、注釈           |
+|  緊急地震速報 (予報)   | 本文                                         |
+|  緊急地震速報 (警報)   | 本文、エリア                                 |
+|        津波予報        | 本文                                         |
+|       津波注意報       | 本文、エリア                                 |
+|        津波警報        | 本文、エリア                                 |
+|       大津波警報       | 本文、エリア                                 |
 
 ## 💻 環境
 
-- MacOS
+- Mac OS
 - Ubuntu 18.04
 
 Windowsは動作未確認
