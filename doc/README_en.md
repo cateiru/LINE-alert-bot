@@ -74,7 +74,7 @@ sh ./analysis.sh
 
 ## 📥  Points to note when issuing a PR
 
-- Clear all [static analysis](#✅-Static-analysis).
+- Clear all [static analysis](#-Static-analysis).
 - Write the Python Docstring in Google style format.
 
 ## ⚖ LICENSE
