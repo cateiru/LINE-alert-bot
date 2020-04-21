@@ -32,7 +32,7 @@ def main(token: str):
         if earthquake.check_update():
             earthquake.get_earthquake_information()
             earthquake.find_latest()
-            earthquake.post_line()
+            # earthquake.post_line()
         time.sleep(30)
 
 
@@ -50,9 +50,9 @@ class Earthquake():  # pylint: disable=R0902
             os.makedirs(self.directory)
 
         self.responce: Any = None
-        self.formated_text: List[str] = []
+        self.formated_text: List[List[str]] = []
         self.xml_root: Any = None
-        self.post_message: List[str] = []
+        self.post_message: List[List[str]] = []
         self.error: List[Any] = []
 
     def check_update(self) -> bool:
@@ -122,14 +122,22 @@ class Earthquake():  # pylint: disable=R0902
     def find_latest(self):
         '''
         最新の情報を振り分ける。
+        また、同じ震源の地震情報が複数投稿された場合に「第何報」をつける。
         '''
         earthquake_info_path = os.path.join(self.directory, 'latest_earthquake_info.json')
         earthquake_information = self.__load_buffer(earthquake_info_path, [])
 
-        self.post_message = []
         latest_information = earthquake_information
         for individual in self.formated_text:
             if individual not in earthquake_information:
+                if individual[0] == '【震度速報】':
+                    report_num = format_report(self.directory, individual[1])
+                    individual[0] = f'【震度速報 第{report_num}報】'
+                elif individual[0] == '【震源・震度に関する情報】':
+                    report_num = format_report(self.directory, individual[1])
+                    if report_num > 1:
+                        individual[0] = f'【震源・震度に関する情報 第{report_num}報】'
+
                 self.post_message.append(individual)
                 latest_information.append(individual)
 
@@ -141,7 +149,7 @@ class Earthquake():  # pylint: disable=R0902
         '''
         line_bot_api = linebot.LineBotApi(self.token)
         for message in reversed(self.post_message):
-            line_bot_api.broadcast(TextSendMessage(text=message))
+            line_bot_api.broadcast(TextSendMessage(text='\n'.join(message)))
 
     def __earthquake_intensity_report(self, url):
         '''
@@ -157,6 +165,7 @@ class Earthquake():  # pylint: disable=R0902
         -----
         > 震度速報
         '''
+        text = []
         earthquake_details = self.__request_text(url)
         details_root = xmltodict.parse(earthquake_details)
 
@@ -164,12 +173,14 @@ class Earthquake():  # pylint: disable=R0902
         forecast_comment = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
 
         area_info = self.__format_area(details_root)
-        report_num = format_report(self.directory, main_text)
 
-        text = f'【震度速報 第{report_num}報】\n{main_text}\n\n'
+        text.append('【震度速報】')
+        text.append(main_text)
+        text.append('')
         for element in area_info:
-            text += f'[{element}] {area_info[element]}\n\n'
-        text += f'{forecast_comment}'
+            text.append(f'[{element}] {area_info[element]}')
+            text.append('')
+        text.append(forecast_comment)
         self.formated_text.append(text)
 
     def __epicenter_information(self, url):
@@ -186,6 +197,7 @@ class Earthquake():  # pylint: disable=R0902
         -----
         > 震源に関する情報
         '''
+        text = []
         earthquake_details = self.__request_text(url)
         details_root = xmltodict.parse(earthquake_details)
 
@@ -194,8 +206,13 @@ class Earthquake():  # pylint: disable=R0902
         area = details_root['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
         forecast_comment = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
 
-        text = f'【震源に関する情報】\n{main_text}\n\n震源地: {area}\n\nマグニチュード: M{magnitude}\n\n'
-        text += forecast_comment
+        text.append('【震源に関する情報】')
+        text.append(main_text)
+        text.append('')
+        text.append(f'震源地: {area}')
+        text.append('')
+        text.append(f'マグニチュード: M{magnitude}')
+        text.append(forecast_comment)
         self.formated_text.append(text)
 
     def __information_on_epicenter_and_seismic_intensity(self, url):
@@ -215,6 +232,7 @@ class Earthquake():  # pylint: disable=R0902
         -----
         > 震源・震度に関する情報
         '''
+        text = []
         earthquake_details = self.__request_text(url)
         details_root = xmltodict.parse(earthquake_details)
 
@@ -224,11 +242,14 @@ class Earthquake():  # pylint: disable=R0902
         max_seismic_intensity = details_root['Report']['Body']['Intensity']['Observation']['MaxInt']
         forecast_comment = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
 
-        report_num = format_report(self.directory, main_text)
-
-        text = f'【震源・震度に関する情報 第{report_num}報】\n{main_text}\n\n震源地: {area}\n\nマグニチュード: M{magnitude}\n\n'
-        text += f'最大震度: {max_seismic_intensity}\n\n'
-        text += forecast_comment
+        text.append('【震源・震度に関する情報】')
+        text.append(main_text)
+        text.append('')
+        text.append(f'震源地: {area}')
+        text.append(f'マグニチュード: M{magnitude}')
+        text.append(f'最大震度: {max_seismic_intensity}')
+        text.append('')
+        text.append(forecast_comment)
         self.formated_text.append(text)
 
     def __earthquake_early_warning_forecast(self, url):
@@ -240,12 +261,14 @@ class Earthquake():  # pylint: disable=R0902
         -----
         > 緊急地震速報（予報）
         '''
+        text = []
         earthquake_details = self.__request_text(url)
         details_root = xmltodict.parse(earthquake_details)
 
         main_text = details_root['Report']['Head']['Headline']['Text']
 
-        text = f'【緊急地震速報 (予報)】\n{main_text}'
+        text.append('【緊急地震速報(予報)】')
+        text.append(main_text)
         self.formated_text.append(text)
 
     def __earthquake_early_warning_alarm(self, url):
@@ -259,6 +282,7 @@ class Earthquake():  # pylint: disable=R0902
         -----
         > 緊急地震速報（警報）
         '''
+        text = []
         earthquake_details = self.__request_text(url)
         details_root = xmltodict.parse(earthquake_details)
 
@@ -266,9 +290,10 @@ class Earthquake():  # pylint: disable=R0902
 
         area_info = self.__format_area(details_root)
 
-        text = f'【緊急地震速報 (警報)】\n{main_text}\n\n'
+        text.append('【緊急地震速報 (警報)】')
+        text.append(main_text)
         for element in area_info:
-            text += f'エリア: {area_info[element]}\n'
+            text.append(f'エリア: {area_info[element]}')
 
         self.formated_text.append(text)
 
@@ -284,6 +309,7 @@ class Earthquake():  # pylint: disable=R0902
         エリアは津波予報では表示されない
         > 津波関係すべて
         '''
+        text = []
         earthquake_details = self.__request_text(url)
         details_root = xmltodict.parse(earthquake_details)
 
@@ -291,11 +317,13 @@ class Earthquake():  # pylint: disable=R0902
         main_text = details_root['Report']['Head']['Headline']['Text']
         report_num = format_report(self.directory, main_text)
 
-        text = f'【{title} 第{report_num}報】\n{main_text}'
+        text.append(f'【{title} 第{report_num}報】')
+        text.append(main_text)
 
         if 'Information' in details_root['Report']['Head']['Headline']:
             area_info = self.__format_area(details_root)
-            text += f'\n\nエリア: {area_info[0]}\n'
+            text.append('')
+            text.append(f'エリア: {area_info[0]}')
 
         self.formated_text.append(text)
 
