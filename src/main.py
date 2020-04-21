@@ -13,6 +13,7 @@ import xmltodict
 from linebot.models import TextSendMessage
 
 from json_operation import json_read, json_write
+from report import format_report
 
 
 @click.command()
@@ -163,8 +164,9 @@ class Earthquake():  # pylint: disable=R0902
         forecast_comment = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
 
         area_info = self.__format_area(details_root)
+        report_num = format_report(self.directory, main_text)
 
-        text = f'【震度速報】\n{main_text}\n\n'
+        text = f'【震度速報 第{report_num}報】\n{main_text}\n\n'
         for element in area_info:
             text += f'[{element}] {area_info[element]}\n\n'
         text += f'{forecast_comment}'
@@ -222,7 +224,9 @@ class Earthquake():  # pylint: disable=R0902
         max_seismic_intensity = details_root['Report']['Body']['Intensity']['Observation']['MaxInt']
         forecast_comment = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
 
-        text = f'【震源・震度に関する情報】\n{main_text}\n\n震源地: {area}\n\nマグニチュード: M{magnitude}\n\n'
+        report_num = format_report(self.directory, main_text)
+
+        text = f'【震源・震度に関する情報 第{report_num}報】\n{main_text}\n\n震源地: {area}\n\nマグニチュード: M{magnitude}\n\n'
         text += f'最大震度: {max_seismic_intensity}\n\n'
         text += forecast_comment
         self.formated_text.append(text)
@@ -285,8 +289,9 @@ class Earthquake():  # pylint: disable=R0902
 
         title = details_root['Report']['Head']['Title']
         main_text = details_root['Report']['Head']['Headline']['Text']
+        report_num = format_report(self.directory, main_text)
 
-        text = f'【{title}】\n{main_text}'
+        text = f'【{title} 第{report_num}報】\n{main_text}'
 
         if 'Information' in details_root['Report']['Head']['Headline']:
             area_info = self.__format_area(details_root)
