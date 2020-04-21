@@ -32,7 +32,7 @@ def main(token: str):
         if earthquake.check_update():
             earthquake.get_earthquake_information()
             earthquake.find_latest()
-            # earthquake.post_line()
+            earthquake.post_line()
         time.sleep(30)
 
 
