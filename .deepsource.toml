@@ -1,7 +1,5 @@
 version = 1
 
-test_patterns = ["src/*.py"]
-
 [[analyzers]]
 name = "python"
 enabled = true
