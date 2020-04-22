@@ -7,7 +7,7 @@
 
  🇯🇵 |  [🇺🇸](doc/README_en.md)
 
-<img src='doc/09F987CC-BB71-4DA1-A3A9-37A00BD80AE7.png' width='300'><img src='doc/96EFA527-0BA8-437E-B9F0-A9461127E233.png' width='300'>
+![image](doc/image.png)
 
 ## TL;DR
 
