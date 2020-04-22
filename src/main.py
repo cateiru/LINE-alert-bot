@@ -53,7 +53,6 @@ class Earthquake():  # pylint: disable=R0902
         self.formated_text: List[List[str]] = []
         self.xml_root: Any = None
         self.post_message: List[List[str]] = []
-        self.error: List[Any] = []
 
     def check_update(self) -> bool:
         '''
@@ -130,6 +129,8 @@ class Earthquake():  # pylint: disable=R0902
         latest_information = earthquake_information
         for individual in self.formated_text:
             if individual not in earthquake_information:
+                latest_information.append(individual)
+
                 if individual[0] == '【震度速報】':
                     report_num = format_report(self.directory, individual[1])
                     individual[0] = f'【震度速報 第{report_num}報】'
@@ -139,7 +140,6 @@ class Earthquake():  # pylint: disable=R0902
                         individual[0] = f'【震源・震度に関する情報 第{report_num}報】'
 
                 self.post_message.append(individual)
-                latest_information.append(individual)
 
         self.__save_buffer(earthquake_info_path, latest_information)
 

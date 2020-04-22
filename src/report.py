@@ -44,9 +44,9 @@ def format_report(save_directory: str, body: str) -> int:
     for element in previous_data:
         if body == element['subject']:
             is_existence = True
+            element['report'] += 1
             report = element['report']
             element['date'] = now.strftime(r'%Y%m%d%H%M%S')
-            element['report'] += 1
             break
     if not is_existence:
         report = 1
