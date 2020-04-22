@@ -278,7 +278,7 @@ class Earthquake():  # pylint: disable=R0902
         area_info = self.__format_area(details_root)
         area_text = []
         for element in area_info:
-            area_text.append(f'エリア: {area_info[element]}')
+            area_text.append(area_info[element])
         text['areas'] = area_text
 
         self.formated_text.append(text)
@@ -335,7 +335,7 @@ class Earthquake():  # pylint: disable=R0902
                         areas.append(area['Name'])
                 else:
                     areas.append(individual['Areas']['Area']['Name'])
-                area_info[seismic_intensity] = ', '.join(areas)
+                area_info[seismic_intensity] = '、'.join(areas)
         else:
             seismic_intensity = information['Kind']['Name']
             areas = []
@@ -344,7 +344,7 @@ class Earthquake():  # pylint: disable=R0902
                     areas.append(area['Name'])
             else:
                 areas.append(information['Areas']['Area']['Name'])
-            area_info[seismic_intensity] = ', '.join(areas)
+            area_info[seismic_intensity] = '、'.join(areas)
 
         return area_info
 

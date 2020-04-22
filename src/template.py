@@ -79,74 +79,83 @@ def seismic_intensity_bulletin_template(text: Any) -> Any:
 
     template = {
         "type": "bubble",
-        "body": {
+        "header": {
             "type": "box",
             "layout": "vertical",
             "contents": [
                 {
                     "type": "text",
                     "text": title,
+                    "size": "xxl",
+                    "color": "#e9e8e8",
                     "weight": "bold",
-                    "size": "xl",
-                    "color": "#a30001",
-                    "align": "center"
+                    "align": "center",
+                    "wrap": True
+                }
+            ]
+        },
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": body,
+                            "size": "md",
+                            "color": "#e9e8e8",
+                            "wrap": True
+                        }
+                    ]
                 },
                 {
                     "type": "box",
                     "layout": "vertical",
-                    "margin": "lg",
-                    "spacing": "sm",
                     "contents": [
                         {
-                            "type": "box",
-                            "layout": "baseline",
-                            "spacing": "sm",
-                            "contents": [
-                                {
-                                    "type": "text",
-                                    "text": body,
-                                    "wrap": True,
-                                    "color": "#e0e0e0",
-                                    "size": "sm",
-                                    "flex": 5
-                                }
-                            ]
+                            "type": "spacer",
+                            "size": "xxl"
                         },
                         {
-                            "type": "box",
-                            "layout": "baseline",
-                            "spacing": "sm",
-                            "contents": [
-                                {
-                                    "type": "text",
-                                    "text": areas,
-                                    "wrap": True,
-                                    "color": "#fff77a",
-                                    "size": "md",
-                                    "flex": 5
-                                }
-                            ]
+                            "type": "text",
+                            "text": areas,
+                            "size": "md",
+                            "color": "#f4ce27",
+                            "weight": "bold",
+                            "wrap": True
                         },
                         {
-                            "type": "box",
-                            "layout": "vertical",
-                            "contents": [
-                                {
-                                    "type": "text",
-                                    "text": info,
-                                    "wrap": True,
-                                    "color": "#e0e0e0"
-                                }
-                            ]
+                            "type": "spacer",
+                            "size": "lg"
+                        }
+                    ]
+                },
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": info,
+                            "size": "md",
+                            "color": "#e9e8e8",
+                            "wrap": True
                         }
                     ]
                 }
             ]
         },
         "styles": {
+            "header": {
+                "backgroundColor": "#ef1925",
+                "separatorColor": "#ef1925"
+            },
             "body": {
-                "backgroundColor": "#010101",
-                "separatorColor": "#010101"
+                "backgroundColor": "#1c1c1c",
+                "separatorColor": "#1c1c1c"
             }
         }
     }
@@ -173,19 +182,25 @@ def epicenter_information_template(text: Any) -> Any:
 
     template = {
         "type": "bubble",
-        "body": {
+        "header": {
             "type": "box",
             "layout": "vertical",
             "contents": [
                 {
                     "type": "text",
                     "text": title,
-                    "weight": "bold",
                     "size": "xl",
+                    "color": "#1c1c1c",
+                    "weight": "bold",
                     "align": "center",
-                    "color": "#c4cf4c",
                     "wrap": True
-                },
+                }
+            ]
+        },
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
                 {
                     "type": "box",
                     "layout": "vertical",
@@ -193,9 +208,8 @@ def epicenter_information_template(text: Any) -> Any:
                         {
                             "type": "text",
                             "text": body,
-                            "color": "#e0e0e0",
-                            "size": "sm",
-                            "flex": 5,
+                            "size": "md",
+                            "color": "#1c1c1c",
                             "wrap": True
                         }
                     ]
@@ -205,26 +219,28 @@ def epicenter_information_template(text: Any) -> Any:
                     "layout": "vertical",
                     "contents": [
                         {
-                            "type": "text",
-                            "text": magnitude,
-                            "color": "#fff77a",
-                            "size": "sm",
-                            "flex": 5,
-                            "wrap": True
-                        }
-                    ]
-                },
-                {
-                    "type": "box",
-                    "layout": "vertical",
-                    "contents": [
+                            "type": "spacer",
+                            "size": "xxl"
+                        },
                         {
                             "type": "text",
                             "text": area,
-                            "flex": 5,
-                            "size": "sm",
-                            "color": "#fff77a",
+                            "size": "md",
+                            "color": "#3b2feb",
+                            "weight": "bold",
                             "wrap": True
+                        },
+                        {
+                            "type": "text",
+                            "text": magnitude,
+                            "size": "md",
+                            "color": "#3b2feb",
+                            "weight": "bold",
+                            "wrap": True
+                        },
+                        {
+                            "type": "spacer",
+                            "size": "lg"
                         }
                     ]
                 },
@@ -235,18 +251,22 @@ def epicenter_information_template(text: Any) -> Any:
                         {
                             "type": "text",
                             "text": info,
-                            "color": "#e0e0e0",
-                            "wrap": True,
-                            "flex": 5
+                            "size": "md",
+                            "color": "#1c1c1c",
+                            "wrap": True
                         }
                     ]
                 }
             ]
         },
         "styles": {
+            "header": {
+                "backgroundColor": "#f0b80e",
+                "separatorColor": "#ef1925"
+            },
             "body": {
-                "backgroundColor": "#010101",
-                "separatorColor": "#010101"
+                "backgroundColor": "#e9e8e8",
+                "separatorColor": "#1c1c1c"
             }
         }
     }
@@ -274,19 +294,25 @@ def epicenter_and_seismic_intensity_template(text: Any) -> Any:
 
     template = {
         "type": "bubble",
-        "body": {
+        "header": {
             "type": "box",
             "layout": "vertical",
             "contents": [
                 {
                     "type": "text",
                     "text": title,
-                    "weight": "bold",
                     "size": "xl",
+                    "color": "#1c1c1c",
+                    "weight": "bold",
                     "align": "center",
-                    "color": "#c4cf4c",
                     "wrap": True
-                },
+                }
+            ]
+        },
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
                 {
                     "type": "box",
                     "layout": "vertical",
@@ -294,9 +320,8 @@ def epicenter_and_seismic_intensity_template(text: Any) -> Any:
                         {
                             "type": "text",
                             "text": body,
-                            "color": "#e0e0e0",
-                            "size": "sm",
-                            "flex": 5,
+                            "size": "md",
+                            "color": "#1c1c1c",
                             "wrap": True
                         }
                     ]
@@ -306,40 +331,36 @@ def epicenter_and_seismic_intensity_template(text: Any) -> Any:
                     "layout": "vertical",
                     "contents": [
                         {
-                            "type": "text",
-                            "text": magnitude,
-                            "color": "#fff77a",
-                            "size": "sm",
-                            "flex": 5,
-                            "wrap": True
-                        }
-                    ]
-                },
-                {
-                    "type": "box",
-                    "layout": "vertical",
-                    "contents": [
+                            "type": "spacer",
+                            "size": "xxl"
+                        },
                         {
                             "type": "text",
                             "text": area,
-                            "flex": 5,
-                            "size": "sm",
-                            "color": "#fff77a",
+                            "size": "md",
+                            "color": "#3b2feb",
+                            "weight": "bold",
                             "wrap": True
-                        }
-                    ]
-                },
-                {
-                    "type": "box",
-                    "layout": "vertical",
-                    "contents": [
+                        },
+                        {
+                            "type": "text",
+                            "text": magnitude,
+                            "size": "md",
+                            "color": "#3b2feb",
+                            "weight": "bold",
+                            "wrap": True
+                        },
                         {
                             "type": "text",
                             "text": max_seismic_intensity,
-                            "size": "sm",
-                            "color": "#fff77a",
-                            "flex": 5,
+                            "size": "md",
+                            "color": "#3b2feb",
+                            "weight": "bold",
                             "wrap": True
+                        },
+                        {
+                            "type": "spacer",
+                            "size": "lg"
                         }
                     ]
                 },
@@ -350,18 +371,22 @@ def epicenter_and_seismic_intensity_template(text: Any) -> Any:
                         {
                             "type": "text",
                             "text": info,
-                            "color": "#e0e0e0",
-                            "wrap": True,
-                            "flex": 5
+                            "size": "md",
+                            "color": "#1c1c1c",
+                            "wrap": True
                         }
                     ]
                 }
             ]
         },
         "styles": {
+            "header": {
+                "backgroundColor": "#f0b80e",
+                "separatorColor": "#ef1925"
+            },
             "body": {
-                "backgroundColor": "#010101",
-                "separatorColor": "#010101"
+                "backgroundColor": "#e9e8e8",
+                "separatorColor": "#1c1c1c"
             }
         }
     }
@@ -385,19 +410,25 @@ def earthquake_early_warning_forecast_template(text: Any) -> Any:
 
     template = {
         "type": "bubble",
-        "body": {
+        "header": {
             "type": "box",
             "layout": "vertical",
             "contents": [
                 {
                     "type": "text",
                     "text": title,
-                    "weight": "bold",
                     "size": "xl",
+                    "color": "#ef1925",
+                    "weight": "bold",
                     "align": "center",
-                    "color": "#a30001",
                     "wrap": True
-                },
+                }
+            ]
+        },
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
                 {
                     "type": "box",
                     "layout": "vertical",
@@ -405,9 +436,8 @@ def earthquake_early_warning_forecast_template(text: Any) -> Any:
                         {
                             "type": "text",
                             "text": body,
-                            "color": "#e0e0e0",
-                            "size": "sm",
-                            "flex": 5,
+                            "size": "md",
+                            "color": "#e9e8e8",
                             "wrap": True
                         }
                     ]
@@ -415,9 +445,13 @@ def earthquake_early_warning_forecast_template(text: Any) -> Any:
             ]
         },
         "styles": {
+            "header": {
+                "backgroundColor": "#000000",
+                "separatorColor": "#000000"
+            },
             "body": {
-                "backgroundColor": "#010101",
-                "separatorColor": "#010101"
+                "backgroundColor": "#1c1c1c",
+                "separatorColor": "#1c1c1c"
             }
         }
     }
@@ -438,23 +472,29 @@ def earthquake_early_warning_alarm_template(text: Any) -> Any:
     '''
     title = text['title']
     body = text['body']
-    areas = '\n'.join(text['areas'])
+    areas = '、'.join(text['areas'])
 
     template = {
         "type": "bubble",
-        "body": {
+        "header": {
             "type": "box",
             "layout": "vertical",
             "contents": [
                 {
                     "type": "text",
                     "text": title,
-                    "weight": "bold",
                     "size": "xl",
+                    "color": "#ef1925",
+                    "weight": "bold",
                     "align": "center",
-                    "color": "#a30001",
                     "wrap": True
-                },
+                }
+            ]
+        },
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
                 {
                     "type": "box",
                     "layout": "vertical",
@@ -462,9 +502,8 @@ def earthquake_early_warning_alarm_template(text: Any) -> Any:
                         {
                             "type": "text",
                             "text": body,
-                            "color": "#e0e0e0",
-                            "size": "sm",
-                            "flex": 5,
+                            "size": "md",
+                            "color": "#e9e8e8",
                             "wrap": True
                         }
                     ]
@@ -474,20 +513,33 @@ def earthquake_early_warning_alarm_template(text: Any) -> Any:
                     "layout": "vertical",
                     "contents": [
                         {
+                            "type": "spacer",
+                            "size": "xxl"
+                        },
+                        {
                             "type": "text",
-                            "text": areas,
-                            "flex": 5,
+                            "size": "md",
+                            "color": "#f4ce27",
+                            "weight": "bold",
                             "wrap": True,
-                            "color": "#fff77a"
+                            "text": areas
+                        },
+                        {
+                            "type": "spacer",
+                            "size": "lg"
                         }
                     ]
                 }
             ]
         },
         "styles": {
+            "header": {
+                "backgroundColor": "#000000",
+                "separatorColor": "#000000"
+            },
             "body": {
-                "backgroundColor": "#010101",
-                "separatorColor": "#010101"
+                "backgroundColor": "#1c1c1c",
+                "separatorColor": "#1c1c1c"
             }
         }
     }
@@ -514,19 +566,25 @@ def tsunami_template(text: Any) -> Any:
 
         template = {
             "type": "bubble",
-            "body": {
+            "header": {
                 "type": "box",
                 "layout": "vertical",
                 "contents": [
                     {
                         "type": "text",
                         "text": title,
-                        "weight": "bold",
                         "size": "xl",
+                        "color": "#ef1925",
+                        "weight": "bold",
                         "align": "center",
-                        "color": "#fff77a",
                         "wrap": True
-                    },
+                    }
+                ]
+            },
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
                     {
                         "type": "box",
                         "layout": "vertical",
@@ -534,9 +592,8 @@ def tsunami_template(text: Any) -> Any:
                             {
                                 "type": "text",
                                 "text": body,
-                                "color": "#e0e0e0",
-                                "size": "sm",
-                                "flex": 5,
+                                "size": "md",
+                                "color": "#e9e8e8",
                                 "wrap": True
                             }
                         ]
@@ -546,37 +603,57 @@ def tsunami_template(text: Any) -> Any:
                         "layout": "vertical",
                         "contents": [
                             {
+                                "type": "spacer",
+                                "size": "xxl"
+                            },
+                            {
                                 "type": "text",
                                 "text": area,
-                                "color": "#010101"
+                                "size": "md",
+                                "color": "#f4ce27",
+                                "weight": "bold"
+                            },
+                            {
+                                "type": "spacer",
+                                "size": "lg"
                             }
                         ]
                     }
                 ]
             },
             "styles": {
+                "header": {
+                    "backgroundColor": "#223ba1",
+                    "separatorColor": "#223ba1"
+                },
                 "body": {
-                    "backgroundColor": "#a30001",
-                    "separatorColor": "#a30001"
+                    "backgroundColor": "#1c1c1c",
+                    "separatorColor": "#1c1c1c"
                 }
             }
         }
     else:
         template = {
             "type": "bubble",
-            "body": {
+            "header": {
                 "type": "box",
                 "layout": "vertical",
                 "contents": [
                     {
                         "type": "text",
                         "text": title,
-                        "weight": "bold",
                         "size": "xl",
+                        "color": "#ef1925",
+                        "weight": "bold",
                         "align": "center",
-                        "color": "#fff77a",
                         "wrap": True
-                    },
+                    }
+                ]
+            },
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
                     {
                         "type": "box",
                         "layout": "vertical",
@@ -584,9 +661,8 @@ def tsunami_template(text: Any) -> Any:
                             {
                                 "type": "text",
                                 "text": body,
-                                "color": "#e0e0e0",
-                                "size": "sm",
-                                "flex": 5,
+                                "size": "md",
+                                "color": "#e9e8e8",
                                 "wrap": True
                             }
                         ]
@@ -594,9 +670,13 @@ def tsunami_template(text: Any) -> Any:
                 ]
             },
             "styles": {
+                "header": {
+                    "backgroundColor": "#223ba1",
+                    "separatorColor": "#223ba1"
+                },
                 "body": {
-                    "backgroundColor": "#a30001",
-                    "separatorColor": "#a30001"
+                    "backgroundColor": "#1c1c1c",
+                    "separatorColor": "#1c1c1c"
                 }
             }
         }
