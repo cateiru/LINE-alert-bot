@@ -65,7 +65,7 @@ class Earthquake():  # pylint: disable=R0902
         is_update = False
         try:
             self.responce = requests.get(self.url)
-        except Exception:  # pylint: disable=W0703
+        except xmltodict.expat.ExpatError:
             return False
         last_acquisition_file_path = os.path.join(self.directory, 'last_acquisition.json')
         last_acquisition = self.__load_buffer(last_acquisition_file_path, {'latest': None})
@@ -168,19 +168,23 @@ class Earthquake():  # pylint: disable=R0902
         > 震度速報
         '''
         text = {}
-        earthquake_details = self.__request_text(url)
-        details_root = xmltodict.parse(earthquake_details)
+        try:
+            earthquake_details = self.__request_text(url)
+            details_root = xmltodict.parse(earthquake_details)
 
-        text['title'] = '震度速報'
-        text['body'] = details_root['Report']['Head']['Headline']['Text']
+            text['title'] = '震度速報'
+            text['body'] = details_root['Report']['Head']['Headline']['Text']
 
-        area_info = self.__format_area(details_root)
+            area_info = self.__format_area(details_root)
 
-        area_text = []
-        for element in area_info:
-            area_text.append(f'[{element}] {area_info[element]}')
-        text['areas'] = area_text
-        text['info'] = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
+            area_text = []
+            for element in area_info:
+                area_text.append(f'[{element}] {area_info[element]}')
+            text['areas'] = area_text
+            text['info'] = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
+        except xmltodict.expat.ExpatError:
+            text['title'] = '震度速報'
+            text['body'] = 'No data.'
 
         self.formated_text.append(text)
 
