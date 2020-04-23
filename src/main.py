@@ -185,7 +185,7 @@ class Earthquake():  # pylint: disable=R0902
         except xmltodict.expat.ExpatError:
             text['title'] = '震度速報'
             text['body'] = 'No data.'
-            text['areas'] = '[N/A] No data.'
+            text['areas'] = ['[N/A] No data.']
             text['info'] = '今後の情報に注意してください。'
 
         self.formated_text.append(text)
