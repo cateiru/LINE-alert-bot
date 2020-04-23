@@ -149,7 +149,7 @@ class Earthquake():  # pylint: disable=R0902
         line_bot_api = linebot.LineBotApi(self.token)
         for message in reversed(self.post_message):
             flex_message = FlexSendMessage(
-                alt_text=message['title'],
+                alt_text=f'【{message["title"]}】{message["body"]}',
                 contents=apply_template(message))
             line_bot_api.broadcast(flex_message)
 
@@ -224,7 +224,7 @@ class Earthquake():  # pylint: disable=R0902
 
         [注釈: str]
         -----
-        > 震源・震度に関する情報
+        > 震源・震度に関する情報 (震度3以上のみ)
         '''
         text = {}
         earthquake_details = self.__request_text(url)
@@ -234,10 +234,11 @@ class Earthquake():  # pylint: disable=R0902
         text['body'] = details_root['Report']['Head']['Headline']['Text']
         text['magnitude'] = details_root['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
         text['area'] = details_root['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
-        text['max_seismic_intensity'] = details_root['Report']['Body']['Intensity']['Observation']['MaxInt']
+        text['max_seismic_intensity'] = str(details_root['Report']['Body']['Intensity']['Observation']['MaxInt'])
         text['info'] = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
 
-        self.formated_text.append(text)
+        if text['max_seismic_intensity'] in ['3', '4', '5-', '5+', '6-', '6+', '7']:
+            self.formated_text.append(text)
 
     def __earthquake_early_warning_forecast(self, url):
         '''
