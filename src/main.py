@@ -131,14 +131,15 @@ class Earthquake():  # pylint: disable=R0902
         latest_information = earthquake_information
         for individual in self.formated_text:
             if individual not in earthquake_information:
-                latest_information.append(individual)
-
                 if individual['title'] == '震度速報' or individual['title'] == '震源・震度に関する情報':
                     report_num = format_report(self.directory, individual['body'])
                     if report_num > 1:
                         individual['title'] += f' 第{report_num}報'
 
-                self.post_message.append(individual)
+                self.post_message.append(individual.copy())
+
+                del individual['title']
+                latest_information.append(individual)
 
         self.__save_buffer(earthquake_info_path, latest_information)
 
