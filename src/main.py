@@ -13,7 +13,6 @@ import xmltodict
 from linebot.models import FlexSendMessage
 
 from json_operation import json_read, json_write
-from report import format_report
 from template import apply_template
 
 
@@ -130,16 +129,15 @@ class Earthquake():  # pylint: disable=R0902
 
         latest_information = earthquake_information
         for individual in self.formated_text:
-            if individual not in earthquake_information:
+            if individual['data'] not in earthquake_information:
                 if individual['title'] == '震度速報' or individual['title'] == '震源・震度に関する情報':
-                    report_num = format_report(self.directory, individual['body'])
+                    report_num = int(individual['data']['serial'])
                     if report_num > 1:
                         individual['title'] += f' 第{report_num}報'
 
                 self.post_message.append(individual.copy())
 
-                del individual['title']
-                latest_information.append(individual)
+                latest_information.append(individual['data'])
 
         self.__save_buffer(earthquake_info_path, latest_information)
 
@@ -183,11 +181,21 @@ class Earthquake():  # pylint: disable=R0902
                 area_text.append(f'[{element}] {area_info[element]}')
             text['areas'] = area_text
             text['info'] = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
+            text['data'] = {
+                'event_id': details_root['Report']['Head']['EventID'],
+                'serial': details_root['Report']['Head']['Serial'],
+                'url': url
+            }
         except xmltodict.expat.ExpatError:
             text['title'] = '震度速報'
             text['body'] = 'No data.'
             text['areas'] = ['[N/A] No data.']
             text['info'] = '今後の情報に注意してください。'
+            text['data'] = {
+                'event_id': 0000,
+                'serial': 1,
+                'url': url
+            }
 
         self.formated_text.append(text)
 
@@ -214,6 +222,11 @@ class Earthquake():  # pylint: disable=R0902
         text['magnitude'] = details_root['Report']['Body']['Earthquake']['jmx_eb:Magnitude']['#text']
         text['area'] = details_root['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
         text['info'] = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
+        text['data'] = {
+            'event_id': details_root['Report']['Head']['EventID'],
+            'serial': details_root['Report']['Head']['Serial'],
+            'url': url
+        }
         self.formated_text.append(text)
 
     def __information_on_epicenter_and_seismic_intensity(self, url):
@@ -243,6 +256,11 @@ class Earthquake():  # pylint: disable=R0902
         text['area'] = details_root['Report']['Body']['Earthquake']['Hypocenter']['Area']['Name']
         text['max_seismic_intensity'] = str(details_root['Report']['Body']['Intensity']['Observation']['MaxInt'])
         text['info'] = details_root['Report']['Body']['Comments']['ForecastComment']['Text']
+        text['data'] = {
+            'event_id': details_root['Report']['Head']['EventID'],
+            'serial': details_root['Report']['Head']['Serial'],
+            'url': url
+        }
 
         if text['max_seismic_intensity'] in ['3', '4', '5-', '5+', '6-', '6+', '7']:
             self.formated_text.append(text)
@@ -262,6 +280,11 @@ class Earthquake():  # pylint: disable=R0902
 
         text['title'] = '緊急地震速報(予報)'
         text['body'] = details_root['Report']['Head']['Headline']['Text']
+        text['data'] = {
+            'event_id': details_root['Report']['Head']['EventID'],
+            'serial': details_root['Report']['Head']['Serial'],
+            'url': url
+        }
 
         self.formated_text.append(text)
 
@@ -282,6 +305,11 @@ class Earthquake():  # pylint: disable=R0902
 
         text['title'] = '緊急地震速報 (警報)'
         text['body'] = details_root['Report']['Head']['Headline']['Text']
+        text['data'] = {
+            'event_id': details_root['Report']['Head']['EventID'],
+            'serial': details_root['Report']['Head']['Serial'],
+            'url': url
+        }
 
         area_info = self.__format_area(details_root)
         area_text = []
@@ -309,6 +337,11 @@ class Earthquake():  # pylint: disable=R0902
 
         text['title'] = details_root['Report']['Head']['Title']
         text['body'] = details_root['Report']['Head']['Headline']['Text']
+        text['data'] = {
+            'event_id': details_root['Report']['Head']['EventID'],
+            'serial': details_root['Report']['Head']['Serial'],
+            'url': url
+        }
 
         if 'Information' in details_root['Report']['Head']['Headline']:
             area_info = self.__format_area(details_root)
