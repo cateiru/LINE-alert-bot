@@ -129,14 +129,15 @@ class Earthquake():  # pylint: disable=R0902
         earthquake_information = self.__load_buffer(earthquake_info_path, [])
 
         latest_information = earthquake_information
+        self.formated_text.reverse()
         for individual in self.formated_text:
             if individual['data'] not in earthquake_information:
                 if individual['title'] == '震度速報' or individual['title'] == '震源・震度に関する情報':
                     report_num = format_report(self.directory, individual['body'])
                     if report_num > 1:
-                        individual['title'] += f' 第{report_num}報'
+                        individual['title'] += f'\n第{report_num}報'
 
-                self.post_message.append(individual.copy())
+                self.post_message.append(individual)
 
                 latest_information.append(individual['data'])
 
@@ -147,9 +148,9 @@ class Earthquake():  # pylint: disable=R0902
         LINEにpostする。
         '''
         line_bot_api = linebot.LineBotApi(self.token)
-        for message in reversed(self.post_message):
+        for message in self.post_message:
             flex_message = FlexSendMessage(
-                alt_text=f'【{message["title"]}】{message["body"]}',
+                alt_text=message["body"],
                 contents=apply_template(message))
             line_bot_api.broadcast(flex_message)
 
@@ -259,6 +260,12 @@ class Earthquake():  # pylint: disable=R0902
             'event_id': details_root['Report']['Head']['EventID'],
             'url': url
         }
+        if 'Information' in details_root['Report']['Head']['Headline']:
+            area_info = self.__format_area_detailed(details_root)
+            area_text = []
+            for element in area_info:
+                area_text.append(f'[{element}] {area_info[element]}')
+            text['areas'] = area_text
 
         if text['max_seismic_intensity'] in ['3', '4', '5-', '5+', '6-', '6+', '7']:
             self.formated_text.append(text)
@@ -344,8 +351,7 @@ class Earthquake():  # pylint: disable=R0902
 
         self.formated_text.append(text)
 
-    @staticmethod
-    def __format_area(details: Any) -> Dict[str, str]:
+    def __format_area(self, details: Any) -> Dict[str, str]:
         '''
         震度とエリアの情報をフォーマットします。
 
@@ -355,13 +361,48 @@ class Earthquake():  # pylint: disable=R0902
         Returns:
             Dict[str, str]: フォーマットされたデータ。例: {'震度4': 'エリア1', '震度3': 'エリア2, エリア3, エリア4'}
         '''
-        area_info = {}
         informations = details['Report']['Head']['Headline']['Information']
         if isinstance(informations, list):
             information = informations[0]['Item']
         else:
             information = informations['Item']
 
+        return self.__select_area(information)
+
+    def __format_area_detailed(self, details: Any) -> Dict[str, str]:
+        '''
+        震度とエリアの情報をフォーマットします。震源・震度に関する情報用
+
+        Args:
+            details (Any): 元データ
+
+        Returns:
+            Dict[str, str]: フォーマットされたデータ。例: {'震度4': 'エリア1', '震度3': 'エリア2, エリア3, エリア4'}
+        '''
+        informations = details['Report']['Head']['Headline']['Information']
+        if isinstance(informations, list):
+            for element in informations:
+                if element['@type'] == '震源・震度に関する情報（市町村等）':
+                    infomation = element['Item']
+                    break
+            else:
+                return {'Null': 'No data.'}
+        else:
+            infomation = element['Item']
+
+        return self.__select_area(infomation)
+
+    @staticmethod
+    def __select_area(information: Any) -> Dict[str, str]:
+        '''
+        エリアを取得します。
+
+        Args:
+            infomation[Any]: [{'Kind': {'Name': '震度'}, 'Areas': {'Area': [{'Name': '場所', 'Code': ''}]}}]
+        Returns:
+            Dict[str, str]: {'震度': 'エリア1、エリア2'}
+        '''
+        area_info = {}
         if isinstance(information, list):
             for individual in information:
                 seismic_intensity = individual['Kind']['Name']

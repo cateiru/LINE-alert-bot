@@ -280,7 +280,7 @@ def epicenter_and_seismic_intensity_template(text: Any) -> Any:
 
     Args:
         text (Any): 送信するタイトルなどの情報が入ったDict
-                    title, body, magnitude, area, max_seismic_intensity, info
+                    title, body, magnitude, area, areas, max_seismic_intensity, info
 
     Returns:
         Any: テンプレートを適用
@@ -291,6 +291,10 @@ def epicenter_and_seismic_intensity_template(text: Any) -> Any:
     area = f'震源地: {text["area"]}'
     max_seismic_intensity = f'最大震度: 震度{text["max_seismic_intensity"]}'
     info = text['info']
+    if 'areas' in text:
+        areas = '\n\n'.join(text['areas'])
+    else:
+        areas = '[Null] 震度エリアの情報なし。'
 
     template = {
         "type": "bubble",
@@ -302,10 +306,10 @@ def epicenter_and_seismic_intensity_template(text: Any) -> Any:
                     "type": "text",
                     "text": title,
                     "size": "xl",
-                    "color": "#1c1c1c",
-                    "weight": "bold",
                     "align": "center",
-                    "wrap": True
+                    "wrap": True,
+                    "color": "#1c1c1c",
+                    "weight": "bold"
                 }
             ]
         },
@@ -337,26 +341,23 @@ def epicenter_and_seismic_intensity_template(text: Any) -> Any:
                         {
                             "type": "text",
                             "text": area,
-                            "size": "md",
                             "color": "#3b2feb",
                             "weight": "bold",
-                            "wrap": True
+                            "size": "md"
                         },
                         {
                             "type": "text",
                             "text": magnitude,
-                            "size": "md",
                             "color": "#3b2feb",
                             "weight": "bold",
-                            "wrap": True
+                            "size": "md"
                         },
                         {
                             "type": "text",
                             "text": max_seismic_intensity,
-                            "size": "md",
                             "color": "#3b2feb",
                             "weight": "bold",
-                            "wrap": True
+                            "size": "md"
                         },
                         {
                             "type": "spacer",
@@ -369,10 +370,31 @@ def epicenter_and_seismic_intensity_template(text: Any) -> Any:
                     "layout": "vertical",
                     "contents": [
                         {
+                            "type": "spacer"
+                        },
+                        {
+                            "type": "text",
+                            "text": areas,
+                            "wrap": True,
+                            "weight": "bold",
+                            "color": "#1c1c1c",
+                            "size": "md"
+                        },
+                        {
+                            "type": "spacer",
+                            "size": "xxl"
+                        }
+                    ]
+                },
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
                             "type": "text",
                             "text": info,
-                            "size": "md",
                             "color": "#1c1c1c",
+                            "size": "md",
                             "wrap": True
                         }
                     ]
@@ -382,11 +404,11 @@ def epicenter_and_seismic_intensity_template(text: Any) -> Any:
         "styles": {
             "header": {
                 "backgroundColor": "#f0b80e",
-                "separatorColor": "#ef1925"
+                "separatorColor": "#f0b80e"
             },
             "body": {
                 "backgroundColor": "#e9e8e8",
-                "separatorColor": "#1c1c1c"
+                "separatorColor": "#e9e8e8"
             }
         }
     }
