@@ -343,21 +343,24 @@ def epicenter_and_seismic_intensity_template(text: Any) -> Any:
                             "text": area,
                             "color": "#3b2feb",
                             "weight": "bold",
-                            "size": "md"
+                            "size": "md",
+                            "wrap": True
                         },
                         {
                             "type": "text",
                             "text": magnitude,
                             "color": "#3b2feb",
                             "weight": "bold",
-                            "size": "md"
+                            "size": "md",
+                            "wrap": True
                         },
                         {
                             "type": "text",
                             "text": max_seismic_intensity,
                             "color": "#3b2feb",
                             "weight": "bold",
-                            "size": "md"
+                            "size": "md",
+                            "wrap": True
                         },
                         {
                             "type": "spacer",
