@@ -12,9 +12,10 @@ import requests
 import xmltodict
 from linebot.models import FlexSendMessage
 
+from emergency_stop import stop
 from json_operation import json_read, json_write
-from template import apply_template
 from report import format_report
+from template import apply_template
 
 
 @click.command()
@@ -153,6 +154,7 @@ class Earthquake():  # pylint: disable=R0902
                 alt_text=message["body"],
                 contents=apply_template(message))
             line_bot_api.broadcast(flex_message)
+        stop(self.post_message, line_bot_api)
 
     def __earthquake_intensity_report(self, url):
         '''
