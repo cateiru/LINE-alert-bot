@@ -66,7 +66,7 @@ class Earthquake():  # pylint: disable=R0902
         is_update = False
         try:
             self.responce = requests.get(self.url)
-        except xmltodict.expat.ExpatError:
+        except requests.exceptions.ConnectionError:
             return False
         last_acquisition_file_path = os.path.join(self.directory, 'last_acquisition.json')
         last_acquisition = self.__load_buffer(last_acquisition_file_path, {'latest': None})
@@ -92,8 +92,8 @@ class Earthquake():  # pylint: disable=R0902
         '''
         self.formated_text = []
 
-        if self.responce is None:
-            self.responce = requests.get(self.url)
+        assert self.responce is not None, 'Can not read page.'
+
         self.responce.encoding = 'UTF-8'
         text = self.responce.text
 
