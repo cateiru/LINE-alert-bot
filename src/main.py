@@ -97,7 +97,11 @@ class Earthquake():  # pylint: disable=R0902
         self.responce.encoding = 'UTF-8'
         text = self.responce.text
 
-        self.xml_root = xmltodict.parse(text)
+        try:
+            self.xml_root = xmltodict.parse(text)
+        except xmltodict.expat.ExpartError:
+            continue
+
         for child in self.xml_root['feed']['entry']:
             title = child['title']
             tsunami = re.search(r'津波', title)
