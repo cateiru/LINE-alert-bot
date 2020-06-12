@@ -100,7 +100,7 @@ class Earthquake():  # pylint: disable=R0902
         try:
             self.xml_root = xmltodict.parse(text)
         except xmltodict.expat.ExpartError:
-            continue
+            return
 
         for child in self.xml_root['feed']['entry']:
             title = child['title']

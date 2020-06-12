@@ -1,6 +1,6 @@
 
-# Created by https://www.gitignore.io/api/macos,python,visualstudiocode
-# Edit at https://www.gitignore.io/?templates=macos,python,visualstudiocode
+# Created by https://www.toptal.com/developers/gitignore/api/macos,python,visualstudiocode,venv
+# Edit at https://www.toptal.com/developers/gitignore?templates=macos,python,visualstudiocode,venv
 
 ### macOS ###
 # General
@@ -80,12 +80,23 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
+*.py,cover
 .hypothesis/
 .pytest_cache/
 
 # Translations
 *.mo
 *.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
 
 # Scrapy stuff:
 .scrapy
@@ -95,6 +106,13 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
 
 # pyenv
 .python-version
@@ -106,11 +124,24 @@ target/
 #   install all needed dependencies.
 #Pipfile.lock
 
-# celery beat schedule file
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+__pypackages__/
+
+# Celery stuff
 celerybeat-schedule
+celerybeat.pid
 
 # SageMath parsed files
 *.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
 # Spyder project settings
 .spyderproject
@@ -118,11 +149,6 @@ celerybeat-schedule
 
 # Rope project settings
 .ropeproject
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
 
 # mkdocs documentation
 /site
@@ -135,17 +161,31 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# pytype static type analyzer
+.pytype/
+
+### venv ###
+# Virtualenv
+# http://iamzed.com/2009/05/07/a-primer-on-virtualenv/
+[Bb]in
+[Ii]nclude
+[Ll]ib
+[Ll]ib64
+[Ll]ocal
+[Ss]cripts
+pyvenv.cfg
+pip-selfcheck.json
+
 ### VisualStudioCode ###
 .vscode/*
+!.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+*.code-workspace
 
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 .history
 
-# End of https://www.gitignore.io/api/macos,python,visualstudiocode
-
-
-src/saves/
+# End of https://www.toptal.com/developers/gitignore/api/macos,python,visualstudiocode,venv
